@@ -1,0 +1,37 @@
+﻿#include "lvgl/lvgl.h"
+#include "lv_drivers/display/fbdev.h"
+#include <unistd.h>
+#include "lv_examples/lv_apps/demo/demo.h"
+
+extern void fbdev_flush(int32_t x1,int32_t  y1,int32_t  y2,const  lv_color_t * color_p);
+//extern void demo_create(void);
+int main(void)
+{
+    /*LittlevGL init*/
+    lv_init();
+
+    /*Linux frame buffer device init*/
+    fbdev_init();
+
+    /*Add a display the LittlevGL sing the frame buffer driver*/
+    lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.disp_flush = fbdev_flush;      /*It flushes the internal graphical buffer to the frame buffer*/
+    lv_disp_drv_register(&disp_drv);
+
+    /*Create a "Hello world!" label*/
+    lv_obj_t * label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(label, "你好 hello world!");
+    lv_obj_align(label, NULL, LV_ALIGN_CENTER, 0, 0);
+
+    /*Handle LitlevGL tasks (tickless mode)*/
+	
+	demo_create();
+    while(1) {
+        lv_tick_inc(5);
+        lv_task_handler();
+        usleep(5000);
+    }
+
+    return 0;
+}
